@@ -1,3 +1,6 @@
+#getting trajectory with changing the path in okvis_app_synchronous.cpp
+
+
 README                        {#mainpage}
 ======
 
