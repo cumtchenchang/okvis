@@ -48,6 +48,10 @@
 #include <memory>
 #include <functional>
 #include <atomic>
+#include <iostream>                          //add
+#include <fstream>                           //add
+using namespace std;                         //add
+
 
 #include <Eigen/Core>
 
@@ -66,12 +70,16 @@ class PoseViewer
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   constexpr static const double imageSize = 500.0;
+ 
+ int count;                                    //add
+ 
   PoseViewer()
   {
     cv::namedWindow("OKVIS Top View");
     _image.create(imageSize, imageSize, CV_8UC3);
     drawing_ = false;
     showing_ = false;
+    count = 0;                                 //add
   }
   // this we can register as a callback
   void publishFullStateAsCallback(
@@ -140,6 +148,62 @@ class PoseViewer
     cv::putText(_image, veltext.str(), cv::Point(15,35),
                     cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255,255,255), 1);
 
+     ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    // write result to file
+    count++;
+    if(count >15)
+    {
+      count = 0 ;
+
+        std::ofstream foutT("/home/cc/test/test1/okvis/okvistest.txt", ios::app);
+        foutT.setf(ios::fixed, ios::floatfield);
+        foutT.precision(6);
+        foutT << t.sec << "." << t.nsec  << " ";
+        foutT.precision(5);
+        foutT << T_WS.r()(1) << " "
+              << -T_WS.r()(0) << " "
+              << T_WS.r()(2) << " "
+              << T_WS.q().w() << " "
+              << T_WS.q().x() << " "
+              << T_WS.q().y()<< " "
+              << T_WS.q().z()<< endl;
+        foutT.close();
+
+        std::ofstream foutC("/home/cc/test/test1/okvis/okvistest.csv", ios::app);
+        foutC.setf(ios::fixed, ios::floatfield);
+        foutC.precision(0);
+        foutC << t.sec  << t.nsec << ",";
+        foutC.precision(5);
+        foutC << r[1] << ","
+              << -r[0] << ","
+              << r[2] << ","
+              << T_WS.q().w() << ","
+              << T_WS.q().x() << ","
+              << T_WS.q().y()<< ","
+              << T_WS.q().z()<< ","<< endl;
+        foutC.close();
+
+        // std::ofstream foutC1("/home/wangshuailpp/okvis/okvistest1.csv", ios::app);
+        // foutC1.setf(ios::fixed, ios::floatfield);
+        // foutC1.precision(0);
+        // foutC1 << t.sec  << t.nsec << ",";
+        // foutC1.precision(5);
+        // foutC1 << r[1] << ","
+        //       << -r[0] << ","
+        //       << r[2] << ","
+        //       << T_WS.q().w() << ","
+        //       << T_WS.q().x() << ","
+        //       << T_WS.q().y()<< ","
+        //       << T_WS.q().z()<< endl;
+        // foutC1.close();
+
+        
+    }
+        
+    ///////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+ 
     drawing_ = false; // notify
   }
   void display()
