@@ -83,7 +83,7 @@ class PoseViewer
   }
   // this we can register as a callback
   void publishFullStateAsCallback(
-      const okvis::Time & /*t*/, const okvis::kinematics::Transformation & T_WS,
+      const okvis::Time & t, const okvis::kinematics::Transformation & T_WS,
       const Eigen::Matrix<double, 9, 1> & speedAndBiases,
       const Eigen::Matrix<double, 3, 1> & /*omega_S*/)
   {
@@ -147,6 +147,15 @@ class PoseViewer
     veltext << "velocity = [" << speedAndBiases[0] << ", " << speedAndBiases[1] << ", " << speedAndBiases[2] << "]";
     cv::putText(_image, veltext.str(), cv::Point(15,35),
                     cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255,255,255), 1);
+    std::stringstream gbaltext;
+    gbaltext << "gba = [" << speedAndBiases[3] << ", " << speedAndBiases[4] << ", " << speedAndBiases[5] << "]";
+    cv::putText(_image, gbaltext.str(), cv::Point(15,55),
+                    cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255,255,255), 1);
+    std::stringstream abaltext;
+    abaltext << "aba = [" << speedAndBiases[6] << ", " << speedAndBiases[7] << ", " << speedAndBiases[8] << "]";
+    cv::putText(_image, abaltext.str(), cv::Point(15,75),
+                    cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(255,255,255), 1);    
+   
 
      ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
@@ -155,8 +164,25 @@ class PoseViewer
     if(count >15)
     {
       count = 0 ;
+      
+        std::ofstream foutV("/home/cc/okvis_trajectory/okvis_velocityandbias.txt", ios::app);
+        foutV.setf(ios::fixed, ios::floatfield);
+        foutV.precision(6);
+        foutV << t.sec << "." << t.nsec  << " ";
+        foutV.precision(5);
+        foutV <<  speedAndBiases[0] << " "
+              <<  speedAndBiases[1] << " "
+              <<  speedAndBiases[2] << " "
+	      <<  speedAndBiases[3] << " "
+              <<  speedAndBiases[4] << " "
+	      <<  speedAndBiases[5] << " "
+              <<  speedAndBiases[6] << " "
+	      <<  speedAndBiases[7] << " "
+	      <<  speedAndBiases[8] << " "
+	      << endl;
+        foutV.close();
 
-        std::ofstream foutT("/home/cc/test/test1/okvis/okvistest.txt", ios::app);
+        std::ofstream foutT("/home/cc/okvis_trajectory/okvis_trajectory.txt", ios::app);
         foutT.setf(ios::fixed, ios::floatfield);
         foutT.precision(6);
         foutT << t.sec << "." << t.nsec  << " ";
@@ -168,9 +194,12 @@ class PoseViewer
               << T_WS.q().x() << " "
               << T_WS.q().y()<< " "
               << T_WS.q().z()<< endl;
-        foutT.close();
+        foutT.close();	
+	
+	
+	
 
-        std::ofstream foutC("/home/cc/test/test1/okvis/okvistest.csv", ios::app);
+        std::ofstream foutC("/home/cc/okvis_trajectory/okvis_trajectory.csv", ios::app);
         foutC.setf(ios::fixed, ios::floatfield);
         foutC.precision(0);
         foutC << t.sec  << t.nsec << ",";
