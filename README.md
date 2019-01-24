@@ -1,4 +1,7 @@
 #getting trajectory with changing the path in okvis_app_synchronous.cpp
+# Adding mobile robot example in Example
+链接：https://pan.baidu.com/s/1IXIAcwnkMPL_8lE7Veq3Fw 提取码：lkyc
+
 
 
 README                        {#mainpage}
