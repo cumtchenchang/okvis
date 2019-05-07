@@ -65,6 +65,35 @@ using namespace std;                         //add
 
 #include <boost/filesystem.hpp>
 
+#include <ctime>
+#include <cstdlib>
+#include <chrono>
+
+class TicToc
+{
+  public:
+    TicToc()
+    {
+        tic();
+    }
+
+    void tic()
+    {
+        start = std::chrono::system_clock::now();
+    }
+
+    double toc()
+    {
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        return elapsed_seconds.count() * 1000;
+    }
+
+  private:
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+};
+
+
 class PoseViewer
 {
  public:
@@ -401,7 +430,8 @@ int main(int argc, char **argv)
     okvis::Time t;
 
     for (size_t i = 0; i < numCameras; ++i) {
-      cv::Mat filtered = cv::imread(
+      TicToc PerimageProcessTime;
+        cv::Mat filtered = cv::imread(
           path + "/cam" + std::to_string(i) + "/data/" + *cam_iterators.at(i),
           cv::IMREAD_GRAYSCALE);
       std::string nanoseconds = cam_iterators.at(i)->substr(
@@ -455,6 +485,15 @@ int main(int argc, char **argv)
       }
 
       cam_iterators[i]++;
+      
+      ofstream loop_path_file("/home/cc/output/OKVIS_perimage_process_time.txt", ios::app);
+      loop_path_file.setf(ios::fixed, ios::floatfield);
+      loop_path_file.precision(6);
+      loop_path_file << t <<" "<<PerimageProcessTime.toc() << endl;
+      loop_path_file.close();
+      
+      
+      
     }
     ++counter;
 
@@ -464,7 +503,7 @@ int main(int argc, char **argv)
           << int(double(counter) / double(num_camera_images) * 100) << "%  "
           << std::flush;
     }
-
+    
   }
 
   std::cout << std::endl << std::flush;
